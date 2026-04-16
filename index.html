@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Bedayti Slider</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: white;
+        color: black;
+        overflow: hidden;
+    }
+
+    /* لوجو في الخلفية */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        background-image: url("https://bedayti.com/wp-content/uploads/2022/02/logo.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 300px;
+
+        opacity: 0.08;
+        z-index: -1;
+    }
+
+    /* Bedayti فوق الشمال */
+    .header {
+        position: absolute;
+        top: 20px;
+        left: 30px;
+        font-size: 28px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        z-index: 10;
+    }
+
+    /* السلايدر */
+    .slider {
+        width: 90%;
+        height: 80vh;
+        margin: 80px auto 20px auto;
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        background: #f5f5f5;
+    }
+
+    .slider img {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        object-fit: contain;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+    }
+
+    .slider img.active {
+        opacity: 1;
+    }
+
+    /* النقاط */
+    .dots {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .dot {
+        height: 8px;
+        width: 8px;
+        margin: 5px;
+        display: inline-block;
+        background: #999;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .dot.active {
+        background: #333;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">Bedayti</div>
+
+<div class="slider">
+    <img src="Screen1.png" class="active">
+    <img src="SamarScreen.jpeg">
+    <img src="SalamaScreen.jpeg">
+    <img src="HelmyScreen.jpeg">
+    <img src="YoussefScreen.jpeg">
+    <img src="Total.jpeg">
+</div>
+
+<div class="dots"></div>
+
+<script>
+let images = document.querySelectorAll(".slider img");
+let current = 0;
+
+// إنشاء النقاط
+let dotsContainer = document.querySelector(".dots");
+
+images.forEach((_, index) => {
+    let dot = document.createElement("span");
+    dot.classList.add("dot");
+
+    if(index === 0) dot.classList.add("active");
+
+    dot.onclick = () => {
+        changeTo(index);
+    };
+
+    dotsContainer.appendChild(dot);
+});
+
+let dots = document.querySelectorAll(".dot");
+
+function changeTo(index) {
+    images[current].classList.remove("active");
+    dots[current].classList.remove("active");
+
+    current = index;
+
+    images[current].classList.add("active");
+    dots[current].classList.add("active");
+}
+
+function changeImage() {
+    let next = (current + 1) % images.length;
+    changeTo(next);
+}
+
+// تغيير كل 30 ثانية
+setInterval(changeImage, 30000);
+</script>
+
+</body>
+</html>
