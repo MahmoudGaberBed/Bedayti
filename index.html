@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bedayti Dashboard Pro</title>
+    <title>Bedayti Dashboard Pro - Custom Scroll Control</title>
 
     <style>
         :root {
@@ -15,7 +15,6 @@
             --accent: #000000;
         }
 
-        /* ألوان الدارك مود */
         [data-theme="dark"] {
             --primary-bg: #121212;
             --header-bg: #1e1e1e;
@@ -58,22 +57,12 @@
             position: relative;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        .header-right { display: flex; align-items: center; gap: 15px; }
         .header img { height: 40px; }
         .header span { font-size: 24px; font-weight: bold; color: var(--text-color); }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
 
-        /* زر الدارك مود */
         .theme-toggle {
             background: var(--clock-bg);
             border: 1px solid var(--border-color);
@@ -106,11 +95,7 @@
             height: 3px;
             background: rgba(0,0,0,0.05);
         }
-        .progress-bar {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-        }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; }
 
         .slider-wrapper {
             position: relative;
@@ -122,7 +107,7 @@
             width: 100%;
             height: calc(100vh - 150px);
             position: relative;
-            background: white; /* الشيتات تظل خلفيتها بيضاء لسهولة القراءة */
+            background: white;
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -142,7 +127,6 @@
             padding: 10px;
             transition: 0.3s;
         }
-
         .nav-arrow:hover { transform: translateY(-50%) scale(1.2); }
         .arrow-right { right: -65px; } 
         .arrow-left { left: -65px; }
@@ -156,8 +140,22 @@
         }
         .slide.active { opacity: 1; visibility: visible; }
 
-        .frame-container { width: 100%; height: 100%; }
-        .frame-container iframe { width: 100%; height: 100%; border: none; }
+        .frame-container { 
+            width: 100%; 
+            height: 100%; 
+            position: relative;
+            overflow: hidden; 
+        }
+
+        .frame-container iframe { 
+            width: 100%; 
+            height: 200%; 
+            border: none; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: top 12s ease-in-out;
+        }
 
         .dots { text-align: center; padding-top: 15px; }
         .dot {
@@ -227,8 +225,42 @@
     const duration = 60000; 
     let startTime;
     let timerId;
+    let scrollInterval;
 
-    // وظيفة الدارك مود
+    function handleAutoScroll() {
+        clearInterval(scrollInterval);
+        
+        // تعديل: منع السكرول للشيت الأول (0) والأخير (5)
+        if (current === 0 || current === slides.length - 1) {
+            // إعادة الشيت لوضعه الطبيعي لو كان متحرك
+            const resetIframe = slides[current].querySelector("iframe");
+            if (resetIframe) {
+                resetIframe.style.transition = "none";
+                resetIframe.style.top = "0";
+            }
+            return; // توقف هنا ولا تكمل باقي الكود
+        }
+
+        const activeIframe = document.querySelector(".slide.active iframe");
+        if (activeIframe) {
+            activeIframe.style.transition = "none";
+            activeIframe.style.top = "0";
+
+            function startLoop() {
+                activeIframe.style.transition = "top 12s ease-in-out";
+                activeIframe.style.top = "-90%"; 
+
+                setTimeout(() => {
+                    activeIframe.style.transition = "top 12s ease-in-out";
+                    activeIframe.style.top = "0";
+                }, 14000); 
+            }
+
+            startLoop();
+            scrollInterval = setInterval(startLoop, 28000);
+        }
+    }
+
     function toggleTheme() {
         const body = document.body;
         const btn = document.getElementById("themeBtn");
@@ -241,7 +273,6 @@
         }
     }
 
-    // تحديث الساعة بنظام 12 ساعة
     function updateClock() {
         const now = new Date();
         let hours = now.getHours();
@@ -279,10 +310,13 @@
         current = (index + slides.length) % slides.length;
         slides[current].classList.add("active");
         dots[current].classList.add("active");
+        
         startTime = Date.now();
         progressBar.style.width = "0%";
         clearInterval(timerId);
         timerId = setInterval(nextSlide, duration);
+        
+        handleAutoScroll(); 
     }
 
     function nextSlide() { changeTo(current + 1); }
@@ -292,6 +326,7 @@
         startTime = Date.now();
         updateProgress();
         timerId = setInterval(nextSlide, duration);
+        handleAutoScroll();
     };
 
     setInterval(() => {
