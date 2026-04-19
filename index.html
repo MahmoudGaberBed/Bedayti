@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bedayti Dashboard Pro - Custom Scroll Control</title>
+    <title>Bedayti Dashboard Pro - Full Slider</title>
 
     <style>
         :root {
@@ -31,21 +31,9 @@
             color: var(--text-color);
             overflow: hidden; 
             height: 100vh;
-            transition: all 0.3s ease;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background-image: url("https://bedayti.com/assets/images/Bedayati-logo-top-ar.png");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 300px;
-            opacity: 0.03;
-            z-index: -1;
-        }
-
+        /* الهيدر */
         .header {
             height: 65px;
             padding: 0 30px;
@@ -55,57 +43,43 @@
             background: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
             position: relative;
+            z-index: 1000;
         }
 
-        .header-right { display: flex; align-items: center; gap: 15px; }
         .header img { height: 40px; }
-        .header span { font-size: 24px; font-weight: bold; color: var(--text-color); }
-
-        .header-left { display: flex; align-items: center; gap: 15px; }
-
-        .theme-toggle {
-            background: var(--clock-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .theme-toggle:hover { background: var(--accent); color: var(--primary-bg); }
+        .header span { font-size: 24px; font-weight: bold; }
 
         .digital-clock {
             font-size: 20px;
             font-weight: 600;
-            color: var(--text-color);
             background: var(--clock-bg);
             padding: 5px 15px;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
             direction: ltr;
         }
 
+        /* شريط التقدم */
         .progress-container {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 3px;
+            height: 4px;
             background: rgba(0,0,0,0.05);
         }
-        .progress-bar { height: 100%; background: var(--accent); width: 0%; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
 
+        /* منطقة السلايدر */
         .slider-wrapper {
             position: relative;
-            width: 92%; 
+            width: 88%; /* مساحة متوازنة */
             margin: 20px auto 0;
+            height: calc(100vh - 160px);
         }
 
         .slider {
             width: 100%;
-            height: calc(100vh - 150px);
+            height: 100%;
             position: relative;
             background: white;
             border-radius: 15px;
@@ -114,6 +88,7 @@
             border: 1px solid var(--border-color);
         }
 
+        /* الأسهم - خارج الصندوق */
         .nav-arrow {
             position: absolute;
             top: 50%;
@@ -123,40 +98,35 @@
             background: none;
             border: none;
             cursor: pointer;
-            z-index: 200;
-            padding: 10px;
+            z-index: 2000;
             transition: 0.3s;
         }
-        .nav-arrow:hover { transform: translateY(-50%) scale(1.2); }
-        .arrow-right { right: -65px; } 
-        .arrow-left { left: -65px; }
+        .arrow-right { right: -60px; } 
+        .arrow-left { left: -60px; }
+        .nav-arrow:hover { transform: translateY(-50%) scale(1.2); opacity: 0.6; }
 
+        /* السلايدات */
         .slide {
             position: absolute;
             inset: 0;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity 0.8s ease-in-out; /* انتقال ناعم */
         }
         .slide.active { opacity: 1; visibility: visible; }
 
+        /* عرض الشيت كاملاً */
         .frame-container { 
             width: 100%; 
-            height: 100%; 
-            position: relative;
-            overflow: hidden; 
+            height: 100%;
         }
-
         .frame-container iframe { 
             width: 100%; 
-            height: 200%; 
-            border: none; 
-            position: absolute;
-            top: 0;
-            left: 0;
-            transition: top 12s ease-in-out;
+            height: 100%;
+            border: none;
         }
 
+        /* النقاط السفلية */
         .dots { text-align: center; padding-top: 15px; }
         .dot {
             height: 9px;
@@ -166,8 +136,9 @@
             background: #ddd;
             border-radius: 50%;
             cursor: pointer;
+            transition: 0.3s;
         }
-        .dot.active { background: var(--accent); width: 20px; border-radius: 10px; }
+        .dot.active { background: var(--accent); width: 22px; border-radius: 10px; }
     </style>
 </head>
 
@@ -180,7 +151,7 @@
     </div>
     
     <div class="header-left">
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">الوضع الليلي 🌙</button>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" style="background: var(--clock-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;">الوضع الليلي 🌙</button>
         <div class="digital-clock" id="clock">00:00:00 --</div>
     </div>
 
@@ -193,7 +164,7 @@
     <button class="nav-arrow arrow-right" onclick="prevSlide()">&#10094;</button>
     <button class="nav-arrow arrow-left" onclick="nextSlide()">&#10095;</button>
 
-    <div class="slider">
+    <div class="slider" id="mainSlider">
         <div class="slide active">
             <div class="frame-container"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQO7aKS8kk7_lbsJZdqXwXM7a-m_Q47vtPBhWu7FnEV4XPdJeumnYxs8a9qRXegPmSn9c99ujfZTAun/pubhtml?gid=945247300&amp;single=true&amp;widget=false&amp;headers=false"></iframe></div>
         </div>
@@ -222,57 +193,21 @@
     let dotsContainer = document.getElementById("dotsContainer");
     let progressBar = document.getElementById("myBar");
     let current = 0;
-    const duration = 60000; 
-    let startTime;
+    const duration = 60000; // دقيقة واحدة لكل سلايد
+    let startTime = Date.now();
     let timerId;
-    let scrollInterval;
 
-    function handleAutoScroll() {
-        clearInterval(scrollInterval);
-        
-        // تعديل: منع السكرول للشيت الأول (0) والأخير (5)
-        if (current === 0 || current === slides.length - 1) {
-            // إعادة الشيت لوضعه الطبيعي لو كان متحرك
-            const resetIframe = slides[current].querySelector("iframe");
-            if (resetIframe) {
-                resetIframe.style.transition = "none";
-                resetIframe.style.top = "0";
-            }
-            return; // توقف هنا ولا تكمل باقي الكود
-        }
+    // إنشاء النقاط السفلية
+    slides.forEach((_, index) => {
+        let dot = document.createElement("span");
+        dot.classList.add("dot");
+        if(index === 0) dot.classList.add("active");
+        dot.onclick = () => changeTo(index);
+        dotsContainer.appendChild(dot);
+    });
+    let dots = document.querySelectorAll(".dot");
 
-        const activeIframe = document.querySelector(".slide.active iframe");
-        if (activeIframe) {
-            activeIframe.style.transition = "none";
-            activeIframe.style.top = "0";
-
-            function startLoop() {
-                activeIframe.style.transition = "top 12s ease-in-out";
-                activeIframe.style.top = "-90%"; 
-
-                setTimeout(() => {
-                    activeIframe.style.transition = "top 12s ease-in-out";
-                    activeIframe.style.top = "0";
-                }, 14000); 
-            }
-
-            startLoop();
-            scrollInterval = setInterval(startLoop, 28000);
-        }
-    }
-
-    function toggleTheme() {
-        const body = document.body;
-        const btn = document.getElementById("themeBtn");
-        if (body.getAttribute("data-theme") === "dark") {
-            body.removeAttribute("data-theme");
-            btn.innerText = "الوضع الليلي 🌙";
-        } else {
-            body.setAttribute("data-theme", "dark");
-            btn.innerText = "الوضع النهاري ☀️";
-        }
-    }
-
+    // وظيفة تحديث الساعة
     function updateClock() {
         const now = new Date();
         let hours = now.getHours();
@@ -285,50 +220,60 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    slides.forEach((_, index) => {
-        let dot = document.createElement("span");
-        dot.classList.add("dot");
-        if(index === 0) dot.classList.add("active");
-        dot.onclick = () => changeTo(index);
-        dotsContainer.appendChild(dot);
-    });
-    let dots = document.querySelectorAll(".dot");
-
-    function updateProgress() {
-        if (!startTime) startTime = Date.now();
-        let elapsed = Date.now() - startTime;
-        let progress = (elapsed / duration) * 100;
-        if (progress <= 100) {
-            progressBar.style.width = progress + "%";
-            requestAnimationFrame(updateProgress);
-        }
-    }
-
+    // وظيفة تبديل السلايد
     function changeTo(index) {
         slides[current].classList.remove("active");
         dots[current].classList.remove("active");
+        
         current = (index + slides.length) % slides.length;
+        
         slides[current].classList.add("active");
         dots[current].classList.add("active");
         
+        // إعادة ضبط التوقيت والبار
         startTime = Date.now();
         progressBar.style.width = "0%";
-        clearInterval(timerId);
-        timerId = setInterval(nextSlide, duration);
-        
-        handleAutoScroll(); 
+        resetTimer();
     }
 
     function nextSlide() { changeTo(current + 1); }
     function prevSlide() { changeTo(current - 1); }
 
-    window.onload = () => {
-        startTime = Date.now();
-        updateProgress();
+    function resetTimer() {
+        clearInterval(timerId);
         timerId = setInterval(nextSlide, duration);
-        handleAutoScroll();
+    }
+
+    // تحديث شريط التقدم بالثواني
+    function animateProgress() {
+        let elapsed = Date.now() - startTime;
+        let progress = (elapsed / duration) * 100;
+        if (progress <= 100) {
+            progressBar.style.width = progress + "%";
+        }
+        requestAnimationFrame(animateProgress);
+    }
+
+    // تبديل الثيم
+    function toggleTheme() {
+        const body = document.body;
+        const btn = document.getElementById("themeBtn");
+        if (body.getAttribute("data-theme") === "dark") {
+            body.removeAttribute("data-theme");
+            btn.innerText = "الوضع الليلي 🌙";
+        } else {
+            body.setAttribute("data-theme", "dark");
+            btn.innerText = "الوضع النهاري ☀️";
+        }
+    }
+
+    // البداية
+    window.onload = () => {
+        resetTimer();
+        animateProgress();
     };
 
+    // تحديث المحتوى كل 5 دقائق
     setInterval(() => {
         document.querySelectorAll("iframe").forEach(frame => { frame.src = frame.src; });
     }, 300000);
